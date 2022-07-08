@@ -16,6 +16,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 os.system('cls' if os.name == 'nt' else 'clear')
@@ -70,27 +73,25 @@ def start_browser():
 # Login
 def sign_in():
     fb_start_page = 'https://m.facebook.com/'
-    print("Logging in %s automatically..." % fb_user)
-    browser.get(fb_start_page)
-    email_id = browser.find_element_by_id("m_login_email")
-    pass_id = browser.find_element_by_id("m_login_password")
-    confirm_id = browser.find_element_by_name("login")
-    email_id.send_keys(fb_user)
-    pass_id.send_keys(fb_pass)
-    confirm_id.click()
-    time.sleep(3)
+    if os.getenv('fb_pass', None):
+        fb_user = os.getenv('fb_user')
+        fb_pass = os.getenv('fb_pass')
+        print("Logging in %s automatically..." % fb_user)
+        browser.get(fb_start_page)
+        # TODO make conditional
+        # WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable(
+        #     (By.CSS_SELECTOR, "button[value='Only allow essential cookies']"))).click()
+        email_id = browser.find_element(By.ID, "m_login_email")
+        pass_id = browser.find_element(By.ID, "m_login_password")
+        email_id.send_keys(fb_user)
+        pass_id.send_keys(fb_pass)
+        browser.find_element(By.NAME, 'login').click()
+        WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable(
+            (By.XPATH, '//*[@id="root"]/div[1]/div/div/div[3]/div[1]/div/div/a'))).click()
+    else:
+        browser.get(fb_start_page)
+        input("Please log into facebook and press enter after the page loads...")
 
-    # If 2FA enabled, prompt for OTP
-    if "checkpoint" in browser.current_url:
-        otp_id = browser.find_element_by_id("approvals_code")
-        continue_id = browser.find_element_by_id("checkpointSubmitButton")
-
-        fb_otp = input("Enter OTP: ")
-        otp_id.send_keys(fb_otp)
-        continue_id.click()
-
-    time.sleep(3)
-    return True
 
 # Download friends list
 def download_friends_list():
