@@ -151,9 +151,9 @@ def create_friends_index():
 
 # Download profile pages
 def download_profiles():
+    index = utils.db_read(db_index)
     print('Downloading profiles...')
     session_downloads = 0
-    index = utils.db_read(db_index)
     for i, d in enumerate(index):
         if d['active']:
             fname = profiles_dir + str(d['id']) + '.html'
@@ -164,13 +164,19 @@ def download_profiles():
                 time.sleep(random.randint(1, 3))
                 if session_downloads == 45:
                     print("Taking a voluntary break at " + str(
-                        session_downloads) + " profile downloads to prevent triggering Facebook's alert systems. I recommend you quit (Ctrl-C or quit this window) to play it safe and try coming back tomorrow to space it out. \nOr, press enter to continue at your own risk.")
-                if browser.title == "You can't use this feature at the moment":
+                        session_downloads) + " profile downloads to prevent triggering Facebook's alert systems."
+                        "I recommend you quit (Ctrl-C or quit this window) to play it safe and try coming back tomorrow to space it out.")
+                    input("Or, press enter to continue at your own risk.")
+                if browser.title == "You Can't Use This Feature Right Now":
                     print(
-                        "\n***WARNING***\n\nFacebook detected abnormal activity, so this script is going play it safe and take a break.\n- As of March 2020, this seems to happen after downloading ~45 profiles in 1 session.\n- I recommend not running the script again until tomorrow.\n- Excessive use might cause Facebook to get more suspicious and possibly suspend your account.\n\nIf you have experience writing scrapers, please feel free to recommend ways to avoid triggering Facebook's detection system :)")
+                        "\n***WARNING***\n\n"
+                        "Facebook detected abnormal activity, so this script is going play it safe and take a break.\n"
+                        "As of March 2020, this seems to happen after downloading ~45 profiles in 1 session.\n"
+                        "I recommend not running the script again until tomorrow.\n"
+                        "Excessive use might cause Facebook to get more suspicious and possibly suspend your account.\n\n"
+                        "If you have experience writing scrapers, please feel free to recommend ways to avoid triggering Facebook's detection system :)")
                     sys.exit(1)
-                if browser.find_elements(By.CSS_SELECTOR, '#login_form') or browser.find_elements(By.CSS_SELECTOR,
-                                                                                                  '#mobile_login_bar'):
+                if browser.find_elements(By.CSS_SELECTOR, '#login_form') or browser.find_elements(By.CSS_SELECTOR,'#mobile_login_bar'):
                     print('\nBrowser is not logged into facebook! Please run again to login & resume.')
                     sys.exit(1)
                 else:
