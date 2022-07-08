@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
-import os, json
-from sqlite_utils import Database
-from selenium import webdriver
+import json
+import os
 
-from webdriver_manager.firefox import GeckoDriverManager
+from sqlite_utils import Database
+
 # driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
 
 # --- Paths ---

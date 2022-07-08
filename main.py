@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import argparse, json, sqlite3, os, glob, time, sys, requests, random, glob, webbrowser, utils
+import argparse
+import glob
+import json
+import os
+import random
+import sys
+import time
+import utils
+from sys import stdout
+
 from lxml import html
 from selenium import webdriver
-from selenium.common import exceptions
-from datetime import datetime
-from geojson import Feature, FeatureCollection, Point
-from sys import stdout
+
 os.system('cls' if os.name == 'nt' else 'clear')
 
 #Set up environment
@@ -279,76 +285,6 @@ def parse_profile_files():
     
     print('>> %s profiles parsed to %s' % (len(profile_files),db_profiles))
 
-# Create index of friends and their locations
-def index_locations():
-    print("Scanning profiles for location (eg. current city)...")
-    profiles = utils.db_read(db_profiles)
-
-    detail_fields = ['Current City','Mobile','Email','Birthday']
-    
-    for p in profiles:
-        details = json.loads(p['details'])
-        new_deets = {}
-        for d in details:
-            for k in d:
-                if k in detail_fields:
-                    new_deets[k] = d.get(k,'')
-        utils.db_update(db_profiles,p['id'],new_deets)
-    
-    print('>> Updated friend locations')
-
-# Get coordinates for all locations
-def make_map():
-    print('Geocoding locations from profiles...')
-    url_base = 'https://api.mapbox.com/geocoding/v5/mapbox.places/'
-
-    profiles = utils.db_read(db_profiles)
-    locations = utils.db_read(db_locations)
-    
-    geo_dict = {}
-    for location in locations:
-        geo_dict[location['location']] = location['coordinates']
-    
-    features = []
-    for d in profiles:
-        city = d['Current City']
-        if city is not None:
-            stdout.flush()
-            stdout.write("\r>> Geocoding %s                         \r" % (city))
-            if city in geo_dict:
-                coordinates = json.loads(geo_dict[city])
-            else:
-                r = requests.get(url_base + city + '.json', params={
-                    'access_token': mapbox_token,
-                    'types': 'place,address',
-                    'limit': 1
-                })
-                try:
-                    coordinates = r.json()['features'][0]['geometry']['coordinates']
-                except IndexError:
-                    pass
-
-                utils.db_write(db_locations,{'location': city,'coordinates': coordinates})
-                geo_dict[city] = str(coordinates)
-
-            features.append(Feature(
-                geometry = Point(coordinates),
-                properties = {'name': d['name'],'location': city,'id': d['id']}
-            ))
-
-            collection = FeatureCollection(features)
-            with open(db_geojson, "w") as f:
-                f.write('%s' % collection)
-
-    with open('template-map.html') as f:
-        html=f.read()
-        html=html.replace('{{mapbox_token}}', mapbox_token)
-        html=html.replace('{{datapoints}}', str(collection))
-    with open('friends-map.html', "w", encoding="utf-8") as f:
-        f.write(html)
-    print('>> Saved map to friends-map.html!')
-    webbrowser.open_new('file://' + os.getcwd() + '/friends-map.html') 
-
 # Shell application
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Facebook friends profile exporter')
@@ -356,7 +292,6 @@ if __name__ == '__main__':
     parser.add_argument('--index', action='store_true', help='Index friends list')
     parser.add_argument('--download', action='store_true', help='Download friends profiles')
     parser.add_argument('--parse', action='store_true', help='Parse profiles to database')
-    parser.add_argument('--map', action='store_true', help='Make the map!')
     parser.add_argument('--json', action='store_true', help='Export database to JSON files')
     args = parser.parse_args()
     signed_in = False
@@ -383,11 +318,6 @@ if __name__ == '__main__':
         #Parse profiles
         if fullrun or args.parse:
             parse_profile_files()
-
-        #Geocode
-        if fullrun or args.map:
-            index_locations()
-            make_map()
 
         #JSON Export (Optional)
         if fullrun or args.json:
