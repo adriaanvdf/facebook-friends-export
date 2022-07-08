@@ -13,6 +13,10 @@ from sys import stdout
 
 from lxml import html
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -51,19 +55,17 @@ if not os.path.exists(profiles_dir):
 
 # Configure browser
 def start_browser():
-    # Ensure mobile-friendly view for parsing
-    useragent = "Mozilla/5.0 (Linux; Android 8.0.0; Pixel 2 XL Build/OPD1.170816.004) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Mobile Safari/537.36"
+    # Setup browser
+    print("Opening Browser...")
+    options = Options()
+    options.add_argument("--disable-notifications")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--mute-audio")
+    options.add_argument("--start-maximized")
+    # options.add_argument("headless")
+    options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
+    return webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
 
-    #Firefox
-    profile = webdriver.FirefoxProfile()
-    profile.set_preference("general.useragent.override", useragent)
-    options = webdriver.FirefoxOptions()
-    options.set_preference("dom.webnotifications.serviceworker.enabled", False)
-    options.set_preference("dom.webnotifications.enabled", False)
-    #options.add_argument('--headless')
-
-    browser = webdriver.Firefox(firefox_profile=profile,options=options)
-    return browser
 
 # Login
 def sign_in():
