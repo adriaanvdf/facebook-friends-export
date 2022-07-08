@@ -99,7 +99,7 @@ def download_friends_list():
     time.sleep(3)
     print('Loading friends list...')
     scrollpage = 1
-    while browser.find_elements_by_css_selector('#m_more_friends'):
+    while browser.find_elements(By.CSS_SELECTOR, '#m_more_friends'):
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         stdout.write("\r>> Scrolled to page %d" % (scrollpage))
         stdout.flush()
@@ -162,7 +162,7 @@ def download_profiles():
                 if browser.title == "You can't use this feature at the moment":
                     print("\n***WARNING***\n\nFacebook detected abnormal activity, so this script is going play it safe and take a break.\n- As of March 2020, this seems to happen after downloading ~45 profiles in 1 session.\n- I recommend not running the script again until tomorrow.\n- Excessive use might cause Facebook to get more suspicious and possibly suspend your account.\n\nIf you have experience writing scrapers, please feel free to recommend ways to avoid triggering Facebook's detection system :)")
                     sys.exit(1)
-                if browser.find_elements_by_css_selector('#login_form') or browser.find_elements_by_css_selector('#mobile_login_bar'):
+                if browser.find_elements(By.CSS_SELECTOR, '#login_form') or browser.find_elements(By.CSS_SELECTOR, '#mobile_login_bar'):
                     print('\nBrowser is not logged into facebook! Please run again to login & resume.')
                     sys.exit(1)
                 else:
