@@ -16,6 +16,8 @@ from sqlite_utils import Database
 
 from datetime import datetime
 import vobject
+import vobject.vcard
+from dotenv import load_dotenv
 from lxml import html
 from selenium import webdriver
 from selenium.common import TimeoutException
@@ -84,6 +86,7 @@ def start_browser():
 # Login
 def sign_in():
     fb_start_page = 'https://m.facebook.com/'
+    load_dotenv()
     if os.getenv('fb_pass', None):
         fb_user = os.getenv('fb_user')
         fb_pass = os.getenv('fb_pass')
