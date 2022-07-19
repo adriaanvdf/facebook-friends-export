@@ -9,12 +9,9 @@ import os
 import random
 import sys
 import time
+from datetime import datetime
 from sys import stdout
 
-import vobject.vcard
-from sqlite_utils import Database
-
-from datetime import datetime
 import vobject
 import vobject.vcard
 from dotenv import load_dotenv
@@ -26,6 +23,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
+from sqlite_utils import Database
 from vobject.base import ValidateError
 from webdriver_manager.chrome import ChromeDriverManager
 
