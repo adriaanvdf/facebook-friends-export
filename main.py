@@ -29,12 +29,16 @@ if os.path.exists('.env'):
     fb_pass = os.getenv('fb_pass')
 else:
     print(
-        "Welcome! Let's set up your environment. This will create a .env file in the same folder as this script, and set it up with your email, password, and Mapbox API Key. This is saved only on your device and only used to autofill the Facebook login form.\n")
+        "Welcome! Let's set up your environment. This will create a .env file in the same folder as this script, "
+        "and set it up with your email, password, and Mapbox API Key. This is saved only on your device and only used "
+        "to autofill the Facebook login form.\n")
 
     fb_user = input("Facebook Email Address: ")
     fb_pass = input("Facebook Password: ")
     print(
-        "\nTo plot your friends on a map, you need a (free) Mapbox API Key. If you don't already have one, follow instructions at https://docs.mapbox.com/help/glossary/access-token, then come back here to enter the access token\n")
+        "\nTo plot your friends on a map, you need a (free) Mapbox API Key. If you don't already have one, "
+        "follow instructions at https://docs.mapbox.com/help/glossary/access-token, then come back here to enter the "
+        "access token\n")
     mapbox_token = input("Mapbox access token: ")
 
     f = open(".env", "w+")
@@ -168,7 +172,8 @@ def download_profiles():
                 if session_downloads == 45:
                     print("Taking a voluntary break at " + str(
                         session_downloads) + " profile downloads to prevent triggering Facebook's alert systems."
-                        "I recommend you quit (Ctrl-C or quit this window) to play it safe and try coming back tomorrow to space it out.")
+                                             "I recommend you quit (Ctrl-C or quit this window) to play it safe and "
+                                             "try coming back tomorrow to space it out.")
                     input("Or, press enter to continue at your own risk.")
                 if browser.title == "You Can't Use This Feature Right Now":
                     print(
@@ -176,10 +181,13 @@ def download_profiles():
                         "Facebook detected abnormal activity, so this script is going play it safe and take a break.\n"
                         "As of March 2020, this seems to happen after downloading ~45 profiles in 1 session.\n"
                         "I recommend not running the script again until tomorrow.\n"
-                        "Excessive use might cause Facebook to get more suspicious and possibly suspend your account.\n\n"
-                        "If you have experience writing scrapers, please feel free to recommend ways to avoid triggering Facebook's detection system :)")
+                        "Excessive use might cause Facebook to get more suspicious and possibly suspend your "
+                        "account.\n\n "
+                        "If you have experience writing scrapers, please feel free to recommend ways to avoid "
+                        "triggering Facebook's detection system :)")
                     sys.exit(1)
-                if browser.find_elements(By.CSS_SELECTOR, '#login_form') or browser.find_elements(By.CSS_SELECTOR,'#mobile_login_bar'):
+                if browser.find_elements(By.CSS_SELECTOR, '#login_form') or browser.find_elements(By.CSS_SELECTOR,
+                                                                                                  '#mobile_login_bar'):
                     print('\nBrowser is not logged into facebook! Please run again to login & resume.')
                     sys.exit(1)
                 else:
@@ -295,15 +303,16 @@ def parse_profile_files():
     print('>> Scanning downloaded profile pages...')
     already_parsed = []
     profiles = utils.db_read(db_profiles)
-    for profile in profiles:
-        already_parsed.append(profile['id'])
+    for data in profiles:
+        already_parsed.append(data['id'])
 
     profile_files = glob.glob(profiles_dir + '*.html')
     for profile_file in profile_files:
         profile_id = int(os.path.basename(profile_file).split('.')[0])
-        if not profile_id in already_parsed:
-            profile = parse_profile(profile_file)
-            utils.db_write(db_profiles, profile)
+        if profile_id not in already_parsed:
+            data = parse_profile(profile_file)
+            if data is not False:
+                utils.db_write(db_profiles, data)
 
     print('>> %s profiles parsed to %s' % (len(profile_files), db_profiles))
 
