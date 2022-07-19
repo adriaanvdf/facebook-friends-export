@@ -45,11 +45,6 @@ else:
 
     fb_user = input("Facebook Email Address: ")
     fb_pass = input("Facebook Password: ")
-    print(
-        "\nTo plot your friends on a map, you need a (free) Mapbox API Key. If you don't already have one, "
-        "follow instructions at https://docs.mapbox.com/help/glossary/access-token, then come back here to enter the "
-        "access token\n")
-    mapbox_token = input("Mapbox access token: ")
 
     f = open(".env", "w+")
     f.write('fb_user="' + fb_user + '"\n')
