@@ -2,24 +2,32 @@
 # coding: utf-8
 
 import argparse
+import ast
 import glob
 import json
 import os
 import random
 import sys
 import time
-import utils
 from sys import stdout
 
+import vobject.vcard
+from sqlite_utils import Database
+
+from datetime import datetime
+import vobject
 from lxml import html
 from selenium import webdriver
 from selenium.common import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
+from vobject.base import ValidateError
+from webdriver_manager.chrome import ChromeDriverManager
+
+import utils
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -317,6 +325,43 @@ def parse_profile_files():
     print('>> %s profiles parsed to %s' % (len(profile_files), db_profiles))
 
 
+def export_to_vcard():
+    if not os.path.exists('db/vcards'):
+        os.makedirs('db/vcards')
+
+    table = Database('db/data.db')['profiles']
+    vcard_file = "db/vcards/{:d}.vcf"
+
+    for table_row in table.rows:
+        card = vobject.vCard()
+        details = {k: v for d in ast.literal_eval(table_row['details']) for k, v in d.items()}
+        work = {k: v for d in ast.literal_eval(table_row['work']) for k, v in d.items()}
+        birthday = details.get('Birthday', '')
+        if ',' in birthday:
+            birthday = datetime.strptime(birthday, "%B %d, %Y").date().isoformat()
+        elif birthday is not '':
+            birthday = datetime.strptime(birthday, "%B %d").date().isoformat()
+
+        # Todo parse name into given and family name
+        card.add('n').value = vobject.vcard.Name(table_row.get('name', ''))
+        card.add('fn').value = table_row.get('name', '')
+        card.add("gender").value = details.get('Gender', '')
+        card.add("bday").value = birthday
+        card.add("org").value = [work.get('org', '')]
+
+        # TODO add other personalia
+        # card.add("adr").value = details.get('Address', '') add parsing for structured addresses https://deepparse.org/
+        # card.adr.type_param = 'HOME'
+        # card.add("tel").value = details.get('Mobile', '')
+        # card.add("lang").value = details.get('Languages', '')
+        # card.add("url").value = details.get('Facebook', '')
+        try:
+            with open(vcard_file.format(table_row.get('id')), 'w+', encoding="utf-8") as f:
+                f.write(card.serialize())
+        except ValidateError:
+            print(f"Issue with generating vCard for {table_row.get('name', '')} with id {table_row.get('id'):d}")
+
+
 # Shell application
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Facebook friends profile exporter')
@@ -324,6 +369,7 @@ if __name__ == '__main__':
     parser.add_argument('--index', action='store_true', help='Create friends index')
     parser.add_argument('--download', action='store_true', help='Download friends profiles')
     parser.add_argument('--parse', action='store_true', help='Parse profiles to database')
+    parser.add_argument('--vcard', action='store_true', help='Export database to vCard files')
     parser.add_argument('--json', action='store_true', help='Export database to JSON files')
     args = parser.parse_args()
     signed_in = False
@@ -350,6 +396,10 @@ if __name__ == '__main__':
         # Parse profiles
         if fullrun or args.parse:
             parse_profile_files()
+
+        # vCard Export
+        if fullrun or args.vcard:
+            export_to_vcard()
 
         # JSON Export (Optional)
         if fullrun or args.json:
