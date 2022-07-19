@@ -26,7 +26,7 @@ Prerequisites:
 4. Run `python3 -m venv venv/` to activate the virtual environment. This is optional if you already have the required packages installed in your environment.
 5. Run `pip install -r requirements.txt` to install the project’s dependencies inside the active virtual environment.
 
-### Usage
+### Execution:
 1. Run `python main.py`. On the first run, it'll ask for your Facebook username/password and Mapbox API Key. It saves these to the local `.env` file for use in subsequent runs (eg if you add more friends).
 2. The tool will then index your friend list, download friend's profiles, geocode coordinates, and create the map. You can optionally use any of these flags to perform only certain actions:
 
