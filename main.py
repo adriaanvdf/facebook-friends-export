@@ -125,7 +125,7 @@ def download_friends_page():
 def create_friends_index():
     print('Reading Facebook friends page file...')
     file_path = os.getcwd() + '/' + friends_html
-    x = html.parse(file_path).xpath
+    x = html.parse(file_path, html.HTMLParser(encoding='utf-8')).xpath
     base = '(//*[@data-sigil="undoable-action"])'
     num_items = len(x(base))
     if num_items == 0:
@@ -216,7 +216,7 @@ def parse_profile(profile_file):
 
     profile_id = int(os.path.basename(profile_file).split('.')[0])
     profile_path = 'file://' + os.getcwd() + '/' + profile_file
-    x = html.parse(profile_path).xpath
+    x = html.parse(profile_path, html.HTMLParser(encoding='utf-8')).xpath
     alias = x('//a/text()[. = "Timeline"][1]/..')[0].get('href')[1:].split('?')[0]
     d = {
         'id': profile_id,
