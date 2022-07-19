@@ -1,10 +1,8 @@
-# Facebook Friend Mapper
+# Facebook Vcard Exporter
 
-![Map Example](https://raw.githubusercontent.com/jcontini/facebook-scraper/master/example.jpg)
+If you want freedom to manage your contacts in a tool of your choosing rather than leaving it to Zuck.
 
-Create a map of your facebook friends! Useful for when you're passing through a city and can't remember all the people you want to grab coffee with.
-
-## First: A Warning
+## Disclaimer
 When using this tool, Facebook can see that you're using an automated tool, which violates their terms. There is a risk that Facebook may decide to put a temporary or permanent ban on your account (though I haven't heard of this happening to anyone yet). I am not responsible for this or any other outcomes that may occur as a result of the use of this software.
 
 ## What this is
@@ -13,32 +11,30 @@ This tool will only extract the data that your friends have already explicitly m
 It works like this:
 1. Open your friends list page (on m.facebook.com) and save to `db/friend_list.html`
 2. Download your friend's profiles (on mbasic.facebook.com) to `db/profiles/`
-3. Parse profiles for 'Current City' or 'Address' and add to location list.
-4. Find the lat/long for each location (using Mapbox API) and save to  `db/points.geojson`.
-5. Creates `friends-map.html`, a self-contained, moveable, searchable map of your friends all over the world!
+3. Parse profile files and adds that data to the database.
+4. Exports the profile data as Vcard files to `db/vcards`
 
 All data is saved locally in `db/data.db` as a sqlite database.
  
-## Installation
+## Usage
 Prerequisites:
-- Make sure that `python 3` and `pipenv` are installed.
-- Create a free [Mapbox API key](https://docs.mapbox.com/help/glossary/access-token). You'll need this so the tool can geocode city names into coordinates to use on the map. 
+- Make sure that `python 3`, `pip` and `venv` are installed.
 
-Then:
+### Preparation:
 1. Clone this repository
 2. `cd` into the cloned folder 
-3. Run `pipenv install` to install dependencies
+4. Run `python3 -m venv venv/` to activate the virtual environment. This is optional if you already have the required packages installed in your environment.
+5. Run `pip install -r requirements.txt` to install the project’s dependencies inside the active virtual environment.
 
-## Using the tool
-1. Run `pipenv shell` to activate the virtual environment. This is optional if you already have the required packages installed in your environment.
-2. Run `python make.py`. On the first run, it'll ask for your Facebook username/password and Mapbox API Key. It saves these to the local `.env` file for use in subsequent runs (eg if you add more friends).
-3. The tool will then index your friend list, download friend's profiles, geocode coordinates, and create the map. You can optionally use any of these flags to perform only certain actions:
+## Usage
+1. Run `python main.py`. On the first run, it'll ask for your Facebook username/password and Mapbox API Key. It saves these to the local `.env` file for use in subsequent runs (eg if you add more friends).
+2. The tool will then index your friend list, download friend's profiles, geocode coordinates, and create the map. You can optionally use any of these flags to perform only certain actions:
 
 - `--list` Sign in, download friends list HTML
 - `--index` Extract friend list HTML to database
 - `--download` Download profile for each friend in index 
 - `--parse` Extract profiles HTML to database
-- `--map` Geocode addresses & make the map!
+- `--vcard` Exports the profile data in the database to Vcard files
 - `--json` Export sqlite database to JSON files (db/json/)
 
 If something breaks, just run the script again. It's built to pick up where it left off at all stages.
