@@ -13,6 +13,7 @@ from sys import stdout
 
 from lxml import html
 from selenium import webdriver
+from selenium.common import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
@@ -76,14 +77,16 @@ def sign_in():
         fb_pass = os.getenv('fb_pass')
         print("Logging in %s automatically..." % fb_user)
         browser.get(fb_start_page)
-        # TODO make conditional
-        # WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable(
-        #     (By.CSS_SELECTOR, "button[value='Only allow essential cookies']"))).click()
+        try:
+            WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable(
+                (By.CSS_SELECTOR, "button[value='Only allow essential cookies']"))).click()
+        except TimeoutException:
+            pass  # No cookies screen
         email_id = browser.find_element(By.ID, "m_login_email")
         pass_id = browser.find_element(By.ID, "m_login_password")
         email_id.send_keys(fb_user)
         pass_id.send_keys(fb_pass)
-        browser.find_element(By.NAME, 'login').click()
+        WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable((By.NAME, 'login'))).click()
         WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable(
             (By.XPATH, '//*[@id="root"]/div[1]/div/div/div[3]/div[1]/div/div/a'))).click()
     else:
