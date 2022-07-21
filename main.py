@@ -358,48 +358,58 @@ def export_to_vcard():
             print(f"Issue with generating vCard for {table_row.get('name', '')} with id {table_row.get('id'):d}")
 
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(prog='Facebook Vcard exporter',
+                                     description='A program to export profiles of Facebook friends to Vcards')
+    parser.add_argument('--list', action='store_true', help='Only download friends page')
+    parser.add_argument('--index', action='store_true', help='Only create friends index')
+    parser.add_argument('--download', action='store_true', help='Only download friends profiles')
+    parser.add_argument('--parse', action='store_true', help='Only parse profiles to database')
+    parser.add_argument('--vcard', action='store_true', help='Only export database to vCard files')
+    parser.add_argument('--json', action='store_true', help='Only export database to JSON files')
+    return parser.parse_args()
+
+
 # Shell application
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Facebook friends profile exporter')
-    parser.add_argument('--list', action='store_true', help='Download friends page')
-    parser.add_argument('--index', action='store_true', help='Create friends index')
-    parser.add_argument('--download', action='store_true', help='Download friends profiles')
-    parser.add_argument('--parse', action='store_true', help='Parse profiles to database')
-    parser.add_argument('--vcard', action='store_true', help='Export database to vCard files')
-    parser.add_argument('--json', action='store_true', help='Export database to JSON files')
-    args = parser.parse_args()
-    signed_in = False
-    try:
-        fullrun = True if len(sys.argv) == 1 else False
+    args = parse_arguments()
 
-        if fullrun or args.list or args.index or args.download:
+    try:
+        if args.list or args.download or not any(vars(args).values()):
             browser = start_browser()
+            sign_in()
 
         # Download friends list
-        if fullrun or args.list:
-            signed_in = sign_in()
+        if args.list:
             download_friends_page()
 
         # Index friends list
-        if fullrun or args.index:
+        if args.index:
             create_friends_index()
 
         # Download profiles
-        if fullrun or args.download:
-            if not signed_in: sign_in()
+        if args.download:
             download_profiles()
 
         # Parse profiles
-        if fullrun or args.parse:
+        if args.parse:
             parse_profile_files()
 
         # vCard Export
-        if fullrun or args.vcard:
+        if args.vcard:
             export_to_vcard()
 
         # JSON Export (Optional)
-        if fullrun or args.json:
+        if args.json:
             utils.db_to_json()
+
+        if not any(vars(args).values()):
+            download_friends_page()
+            create_friends_index()
+            download_profiles()
+            parse_profile_files()
+            export_to_vcard()
+
 
     except KeyboardInterrupt:
         print('\nThanks for using the script! Please raise any issues on Github.')
