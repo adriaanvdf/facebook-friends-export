@@ -410,8 +410,11 @@ if __name__ == '__main__':
             parse_profile_files()
             export_to_vcard()
 
-        if browser.session_id is not None:
+        try:
             browser.close()
+        except NameError:
+            # No browser open
+            pass
 
     except KeyboardInterrupt:
         print('\nThanks for using the script! Please raise any issues on Github.')
