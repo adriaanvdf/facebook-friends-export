@@ -11,6 +11,7 @@ import sys
 import time
 from datetime import datetime
 from sys import stdout
+from nameparser import HumanName
 
 import vobject
 import vobject.vcard
@@ -338,9 +339,9 @@ def export_to_vcard():
         elif birthday is not '':
             birthday = datetime.strptime(birthday, "%B %d").date().isoformat()
 
-        # Todo parse name into given and family name
-        card.add('n').value = vobject.vcard.Name(table_row.get('name', ''))
-        card.add('fn').value = table_row.get('name', '')
+        name = HumanName(table_row.get('name', ''))
+        card.add('n').value = vobject.vcard.Name(given=name.first, family=name.last, prefix=name.title, suffix=name.suffix)
+        card.add('fn').value = name.full_name
         card.add("gender").value = details.get('Gender', '')
         card.add("bday").value = birthday
         card.add("org").value = [work.get('org', '')]
